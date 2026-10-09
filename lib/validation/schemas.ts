@@ -47,3 +47,18 @@ export const profileSchema = z.object({
 export function firstError(error: z.ZodError) {
   return error.issues[0]?.message ?? 'Invalid data'
 }
+
+// ---- Admin ----
+export const adminUpdateSchema = z.object({
+  id: uuid,
+  role: z.enum(['admin', 'advisor', 'client']),
+  advisor_id: z.preprocess((v) => (v === '' || v == null ? null : v), uuid.nullable()),
+})
+
+export const createUserSchema = z.object({
+  full_name: z.string().trim().min(1, 'Name is required').max(120, 'Name: 120 characters max'),
+  email: z.string().trim().toLowerCase().email('Invalid email'),
+  password: z.string().min(8, 'Password: 8 characters minimum'),
+})
+
+export const userIdSchema = z.object({ id: uuid })
