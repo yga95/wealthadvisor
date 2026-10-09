@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export type Role = 'admin' | 'advisor' | 'client'
@@ -20,7 +21,6 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
 // 2e garde (Design Rev. 3, §3.1) : utilisée par chaque layout de rôle.
 export async function requireRole(role: Role): Promise<CurrentUser> {
-  const { redirect } = await import('next/navigation')
   const me = await getCurrentUser()
   if (!me) redirect('/login')
   if (me.role !== role) redirect('/')

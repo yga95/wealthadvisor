@@ -1,12 +1,115 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   WealthAdvisor — design tokens
+   Pine for structure, brass used sparingly for the allocation and focus,
+   Newsreader for names and money, Geist for everything else.
+------------------------------------------------------------------- */
 @theme inline {
+  --color-paper: #f4f6f3;
+  --color-surface: #ffffff;
+  --color-ink: #15241f;
+  --color-muted: #5d6a65;
+  --color-line: #dbe1db;
+  --color-pine: #1f4a3d;
+  --color-pine-deep: #163a30;
+  --color-pine-soft: #e6eee9;
+  --color-brass: #a9823a;
+  --color-brass-soft: #f3ecdd;
+  --color-danger: #a3362b;
+
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-newsreader);
 }
 
-/* Thème clair unique : lisible partout, y compris si le Mac est en mode sombre */
 body {
-  background: #ffffff;
-  color: #111827;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brass);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .page {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .page-title {
+    font-family: var(--font-newsreader), Georgia, serif;
+    font-size: 2.25rem;
+    line-height: 1.1;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .section-title {
+    font-family: var(--font-newsreader), Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 500;
+  }
+  .money {
+    font-family: var(--font-newsreader), Georgia, serif;
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+  }
+  .field {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.875rem;
+    color: var(--color-ink);
+  }
+  .field:focus {
+    border-color: var(--color-pine);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-pine-soft);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 4px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    cursor: pointer;
+  }
+  .btn:hover { border-color: var(--color-pine); }
+  .btn:disabled { opacity: 0.55; cursor: default; }
+  .btn-primary {
+    background: var(--color-pine);
+    border-color: var(--color-pine);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--color-pine-deep); }
+  .btn-danger {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-danger);
+    padding-inline: 0.5rem;
+  }
+  .btn-danger:hover { border-color: transparent; text-decoration: underline; }
+}
+
+/* Champs de montant : sans les petites flèches du navigateur */
+.no-spin::-webkit-outer-spin-button,
+.no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.no-spin { -moz-appearance: textfield; appearance: textfield; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
 }
