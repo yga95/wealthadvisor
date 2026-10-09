@@ -4,7 +4,7 @@ A web app for wealth advisory firms. Advisors keep each client's assets, income 
 
 Built for the AiLaB intern assignment (full-stack AI web application).
 
-**Live app:** https://YOUR-APP.vercel.app
+**Live app:** https://wealthadvisor-yga3.vercel.app
 Demo accounts for each role are shared separately with reviewers.
 
 ---
@@ -86,6 +86,7 @@ app/
   (admin)/admin/users        admin area
   (advisor)/clients, [id]    advisor area
   (client)/portal            client area
+  profile                    shared profile (all roles)
 actions/                     Server Actions (assets, income, notes, clients, recommendations, admin)
 components/                  UI components and page views
 lib/
@@ -133,4 +134,4 @@ Deployed on Vercel from the `main` branch. The four variables from `.env.example
 
 - `middleware.ts` is named `proxy.ts`: Next.js 16 renamed the file convention; behaviour is the same.
 - Recommendation generation is a Server Action (`actions/recommendations.ts`) rather than a Route Handler; it performs the same checks and uses `after()` for the asynchronous model call.
-- Not implemented yet: the shared `/profile` page and pagination of long lists.
+- Not implemented yet: pagination of long lists.

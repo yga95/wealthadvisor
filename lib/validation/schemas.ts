@@ -81,3 +81,8 @@ export const recommendationOutputSchema = z
     { message: 'Allocation must sum to 100' },
   )
 export type RecommendationOutput = z.infer<typeof recommendationOutputSchema>
+
+// ---- Profil partagé (PATCH /users/me : full_name uniquement) ----
+export const myNameSchema = z.object({
+  full_name: z.string().trim().min(1, 'Name is required').max(120, 'Name: 120 characters max'),
+})
