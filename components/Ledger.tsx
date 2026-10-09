@@ -6,7 +6,7 @@ type Act = (state: ActionState, formData: FormData) => Promise<ActionState>
 export type LedgerRow = { id: string; name: string; amount: number }
 
 const ghost =
-  'rounded border border-transparent bg-transparent px-2 py-1.5 text-sm hover:border-line focus:border-pine focus:bg-surface focus:outline-none'
+  'rounded-md border border-transparent bg-transparent px-2 py-1.5 text-sm hover:border-edge focus:border-mint focus:bg-white/5 focus:outline-none'
 
 // Liste de lignes chiffrées. Avec des actions : modifiable sur place (CRUD conseiller).
 // Sans actions : lecture seule (espace client).
@@ -28,12 +28,12 @@ export default function Ledger({
 
   return (
     <section className="panel">
-      <header className="flex items-baseline justify-between border-b border-line px-5 py-4">
+      <header className="flex items-baseline justify-between border-b border-edge px-5 py-4">
         <h2 className="section-title">{title}</h2>
-        <p className="money text-xl">{eur.format(total)}</p>
+        <p className="money text-base text-champagne">{eur.format(total)}</p>
       </header>
 
-      <ul className="divide-y divide-line">
+      <ul className="divide-y divide-edge/70">
         {rows.map((r) =>
           editable ? (
             <li key={r.id} className="group flex items-center gap-2 px-3 py-2 sm:py-1.5">
@@ -65,7 +65,7 @@ export default function Ledger({
       </ul>
 
       {editable && (
-        <ActionForm action={add!} className="flex flex-wrap items-center gap-2 border-t border-dashed border-line px-3 py-3">
+        <ActionForm action={add!} className="flex flex-wrap items-center gap-2 border-t border-dashed border-edge px-3 py-3">
           <input type="hidden" name="owner_id" value={ownerId} />
           <input name={field} placeholder={placeholder} required maxLength={100}
             aria-label={`New ${title.toLowerCase()} name`} className="field min-w-0 basis-full sm:basis-auto sm:flex-1" />

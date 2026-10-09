@@ -58,12 +58,12 @@ export default function SignupPage() {
             onChange={(e) => setPassword(e.target.value)} className="field mt-1.5 w-full" />
         </label>
         {error && <p role="alert" className="text-sm text-danger">{error}</p>}
-        {message && <p className="text-sm text-pine">{message}</p>}
+        {message && <p className="text-sm text-mint">{message}</p>}
         <button disabled={loading} className="btn btn-primary w-full py-2.5">
           {loading ? 'Creating account…' : 'Create account'}
         </button>
         <p className="text-sm text-muted">
-          Already registered? <Link href="/login" className="text-pine underline underline-offset-4">Sign in</Link>
+          Already registered? <Link href="/login" className="text-mint underline underline-offset-4">Sign in</Link>
         </p>
       </form>
     </AuthShell>

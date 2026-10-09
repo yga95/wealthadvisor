@@ -47,7 +47,7 @@ export default function LoginPage() {
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
         <p className="text-sm text-muted">
-          New client? <Link href="/signup" className="text-pine underline underline-offset-4">Create an account</Link>
+          New client? <Link href="/signup" className="text-mint underline underline-offset-4">Create an account</Link>
         </p>
       </form>
     </AuthShell>

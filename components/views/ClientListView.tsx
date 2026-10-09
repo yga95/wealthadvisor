@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Avatar, StatTile, RiskDial } from '@/components/ui'
 import { eur, RISK_LABEL } from '@/lib/format'
 
 export type ClientSummary = {
@@ -6,54 +7,64 @@ export type ClientSummary = {
 }
 
 export default function ClientListView({ clients }: { clients: ClientSummary[] }) {
-  const grand = clients.reduce((s, c) => s + c.total, 0)
+  const book = clients.reduce((s, c) => s + c.total, 0)
+  const missing = clients.filter((c) => c.age == null).length
+  const sorted = [...clients].sort((a, b) => b.total - a.total)
+
   return (
     <main className="page">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <h1 className="page-title">Your clients</h1>
-        {clients.length > 0 && (
-          <p className="text-sm text-muted">
-            {clients.length} {clients.length === 1 ? 'client' : 'clients'}, <span className="money text-lg text-ink">{eur.format(grand)}</span> in recorded assets
-          </p>
-        )}
+      <h1 className="page-title">Your clients</h1>
+      <p className="mt-2 text-sm text-muted">Open a file to update assets, income and notes, or to prepare a recommendation.</p>
+
+      <div className="mt-8 grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <StatTile icon="users" label="Clients" value={clients.length} />
+        <StatTile icon="wallet" label="Assets under advice" value={eur.format(book)} accent />
+        <StatTile icon="portfolio" label="Average per client" value={eur.format(clients.length ? book / clients.length : 0)} />
+        <StatTile icon="alert" label="Profiles to complete" value={missing}
+          hint={missing ? 'Age is needed for recommendations' : 'All profiles are complete'} />
       </div>
 
       {clients.length === 0 ? (
-        <div className="panel mt-8 px-6 py-10 text-center">
+        <div className="panel mt-8 px-6 py-14 text-center">
           <p className="section-title">No clients assigned yet</p>
           <p className="mt-2 text-sm text-muted">An administrator assigns clients to you from the Users page.</p>
         </div>
       ) : (
-        <div className="panel mt-8 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-line text-left text-muted">
-                <th className="px-5 py-3 font-normal">Client</th>
-                <th className="px-3 py-3 font-normal">Age</th>
-                <th className="px-3 py-3 font-normal">Risk profile</th>
-                <th className="px-3 py-3 text-right font-normal">Recorded assets</th>
-                <th className="px-5 py-3"><span className="sr-only">Open</span></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {clients.map((c) => (
-                <tr key={c.id} className="hover:bg-pine-soft/50">
-                  <td className="px-5 py-4">
-                    <Link href={`/clients/${c.id}`} className="font-display text-lg hover:text-pine">
-                      {c.full_name}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-4">{c.age ?? <span className="text-brass">Missing</span>}</td>
-                  <td className="px-3 py-4">{RISK_LABEL[c.risk_tolerance]}</td>
-                  <td className="money px-3 py-4 text-right text-base">{eur.format(c.total)}</td>
-                  <td className="px-5 py-4 text-right">
-                    <Link href={`/clients/${c.id}`} className="btn px-3 py-1">Open file</Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ul className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {sorted.map((c) => {
+            const share = book ? (c.total / book) * 100 : 0
+            return (
+              <li key={c.id}>
+                <Link href={`/clients/${c.id}`}
+                  className="panel block p-5 transition-colors hover:border-champagne/60 focus-visible:border-champagne">
+                  <div className="flex items-start gap-3">
+                    <Avatar name={c.full_name} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{c.full_name}</p>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        <span className={`chip ${c.age == null ? 'border-champagne/50 text-champagne' : ''}`}>
+                          {c.age == null ? 'Age missing' : `${c.age} years`}
+                        </span>
+                        <span className="chip">{RISK_LABEL[c.risk_tolerance]}</span>
+                      </div>
+                    </div>
+                    <RiskDial risk={c.risk_tolerance} size="sm" />
+                  </div>
+
+                  <p className="mt-6 text-xs text-muted">Recorded assets</p>
+                  <p className="money mt-1 text-2xl text-champagne">{eur.format(c.total)}</p>
+
+                  <div className="mt-5 flex items-center gap-3 text-xs text-muted">
+                    <div className="h-1.5 flex-1 rounded-full bg-white/5">
+                      <div className="h-full rounded-full bg-lilac" style={{ width: `${Math.max(share, 2)}%` }} />
+                    </div>
+                    <span className="tabular-nums">{share.toFixed(0)}% of your book</span>
+                  </div>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
       )}
     </main>
   )
