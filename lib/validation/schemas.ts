@@ -62,3 +62,22 @@ export const createUserSchema = z.object({
 })
 
 export const userIdSchema = z.object({ id: uuid })
+
+// ---- Recommandations IA (Design Rev. 3, §5.4) ----
+export const generateSchema = z.object({ client_id: uuid })
+export const archiveSchema = z.object({ id: uuid, client_id: uuid })
+
+// Sortie du modèle : mêmes règles que la base (0-100, somme 100, explication ≤ 4000).
+// Tout écart => status 'failed', jamais une erreur de base de données.
+const pct = z.number().int().min(0).max(100)
+export const recommendationOutputSchema = z
+  .object({
+    allocation: z.object({ actions: pct, obligations: pct, liquidites: pct }),
+    explanation: z.string().trim().min(1).max(4000),
+    disclaimer: z.string().trim().min(1).max(300),
+  })
+  .refine(
+    (o) => o.allocation.actions + o.allocation.obligations + o.allocation.liquidites === 100,
+    { message: 'Allocation must sum to 100' },
+  )
+export type RecommendationOutput = z.infer<typeof recommendationOutputSchema>
