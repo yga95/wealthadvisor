@@ -28,7 +28,7 @@ export default async function ClientFilePage({ params }: { params: Promise<{ id:
     supabase.from('income').select('id, source, amount').eq('owner_id', id).order('created_at'),
     supabase.from('notes').select('id, content, created_at').eq('client_id', id).order('created_at', { ascending: false }),
     supabase.from('recommendations')
-      .select('id, status, pct_actions, pct_obligations, pct_liquidites, explanation, created_at')
+      .select('id, status, pct_actions, pct_obligations, pct_liquidites, explanation, error_reason, created_at')
       .eq('client_id', id).order('created_at', { ascending: false }).limit(8),
   ])
 

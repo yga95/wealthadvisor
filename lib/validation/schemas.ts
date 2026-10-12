@@ -74,7 +74,7 @@ export const recommendationOutputSchema = z
   .object({
     allocation: z.object({ actions: pct, obligations: pct, liquidites: pct }),
     explanation: z.string().trim().min(1).max(4000),
-    disclaimer: z.string().trim().min(1).max(300),
+    // Pas de « disclaimer » généré : le texte de conformité est fixe dans l'interface (Review #4).
   })
   .refine(
     (o) => o.allocation.actions + o.allocation.obligations + o.allocation.liquidites === 100,

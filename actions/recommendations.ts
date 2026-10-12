@@ -4,7 +4,7 @@ import { after } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { draftRecommendation, type RecommendationInput } from '@/lib/ai/recommend'
+import { draftRecommendation, GenerationError, type RecommendationInput } from '@/lib/ai/recommend'
 import { generateSchema, archiveSchema, firstError, type ActionState } from '@/lib/validation/schemas'
 
 // Génération asynchrone (Design Rev. 3, §5.3) :
@@ -67,8 +67,10 @@ export async function generateRecommendation(_prev: ActionState, formData: FormD
         .eq('id', recoId)
         .eq('status', 'generating')
     } catch (e) {
-      console.error('Recommendation failed', recoId, e)
-      await admin.from('recommendations').update({ status: 'failed' })
+      // La raison est enregistrée avec la ligne : le conseiller voit pourquoi, sans les logs Vercel.
+      const reason = e instanceof GenerationError ? e.reason : 'api'
+      console.error('Recommendation failed', recoId, reason, e)
+      await admin.from('recommendations').update({ status: 'failed', error_reason: reason })
         .eq('id', recoId).eq('status', 'generating')
     }
   })

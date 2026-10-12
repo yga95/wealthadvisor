@@ -13,7 +13,16 @@ export type RecoRow = {
   pct_obligations: number | null
   pct_liquidites: number | null
   explanation: string | null
+  error_reason: 'config' | 'rate_limit' | 'api' | 'invalid_output' | null
   created_at: string
+}
+
+// Ce que le conseiller peut faire selon la raison de l'échec (colonne error_reason).
+const FAILURE_TEXT: Record<NonNullable<RecoRow['error_reason']>, string> = {
+  config: 'The AI service rejected the request (model name or API key). The deployment settings need checking; retrying will not help.',
+  rate_limit: 'The AI service is receiving too many requests. Wait a minute, then generate again.',
+  api: 'The AI service could not be reached or was overloaded. Generate again to retry.',
+  invalid_output: 'The model replied, but its allocation did not pass validation, so nothing was saved. Generate again to retry.',
 }
 
 const STATUS_LABEL: Record<RecoRow['status'], string> = {
@@ -70,7 +79,9 @@ export default function AiPanel({
           <div className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm" role="alert">
             <p className="font-medium text-danger">The generation failed</p>
             <p className="mt-1 text-muted">
-              The model did not return a valid allocation, so nothing was saved. Generate again to retry.
+              {latest.error_reason
+                ? FAILURE_TEXT[latest.error_reason]
+                : 'The model did not return a valid allocation, so nothing was saved. Generate again to retry.'}
             </p>
           </div>
         )}
