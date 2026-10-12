@@ -68,7 +68,15 @@ export async function updateSession(request: NextRequest) {
     return isPublic ? response : redirectTo('/login')
   }
 
-  // 2. Connecté : rôle lu en base, en direct (fonction auth_role, §2.4)
+  // 2. Le rôle ne sert qu'aux pages publiques, à « / » et aux préfixes de rôle.
+  //    Ailleurs (/profile…), pas d'aller-retour en base (Review #4) : la page vérifie elle-même.
+  const rule = ROLE_PREFIXES.find((r) => matches(pathname, r.prefix))
+  if (!isPublic && pathname !== '/' && !rule) {
+    return response
+  }
+
+  // Connecté : rôle lu en base, en direct (fonction auth_role, §2.4),
+  // pour qu'un changement de rôle par l'admin s'applique immédiatement.
   const { data: role } = await supabase.rpc('auth_role')
   if (!role) {
     return isPublic ? response : redirectTo('/login')
@@ -81,11 +89,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   // 4. Mauvais rôle pour cette URL : renvoyé chez lui, sans message d'erreur
-  const rule = ROLE_PREFIXES.find((r) => matches(pathname, r.prefix))
   if (rule && rule.role !== role) {
     return redirectTo(home)
   }
 
-  // /profile et le reste : tout utilisateur connecté
   return response
 }

@@ -26,16 +26,13 @@ export async function updateUserRole(_prev: ActionState, formData: FormData): Pr
     if (adv?.role !== 'advisor') return { error: 'The selected user is not an advisor.' }
   }
 
-  const { data: before } = await supabase.from('users').select('role').eq('id', id).single()
+  // Un seul UPDATE. Le trigger after_assignment_change (migration 0004) fait le reste dans la
+  // même transaction : clients d'un conseiller rétrogradé désaffectés, notes de l'ancien
+  // conseiller supprimées. Tout réussit ou tout échoue ensemble.
   const { data, error } = await supabase
     .from('users').update({ role, advisor_id: advisorId }).eq('id', id).select('id')
   if (error) return { error: error.message }
   if (!data?.length) return { error: 'Not allowed.' }
-
-  // Un conseiller rétrogradé : ses clients repassent « non affectés ».
-  if (before?.role === 'advisor' && role !== 'advisor') {
-    await supabase.from('users').update({ advisor_id: null }).eq('advisor_id', id)
-  }
 
   revalidatePath('/admin/users')
   return {}
@@ -73,6 +70,7 @@ export async function deleteUserAccount(_prev: ActionState, formData: FormData):
 
 // 4. Emails pour la liste admin : Auth Admin API après requireAdmin().
 //    On ne garde que id + email (§2.8).
+//    Limite connue : une seule page de 1 000 comptes (pagination non implémentée, voir README).
 export async function getUserEmails(): Promise<Record<string, string>> {
   if (!(await requireAdmin())) return {}
   const { data } = await createAdminClient().auth.admin.listUsers({ perPage: 1000 })
