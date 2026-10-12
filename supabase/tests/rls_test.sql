@@ -1,4 +1,4 @@
--- Test RLS v2 : chaque ligne doit finir par ✅
+-- Test RLS v3 : chaque ligne doit finir par ✅ (21 vérifications)
 create schema if not exists tests;
 drop table if exists tests.results;
 create table tests.results (n int, test text, attendu text, obtenu text);
@@ -100,6 +100,28 @@ begin
   get diagnostics n = row_count;
   insert into tests.results values (18, 'admin : affecte Client Two à advisor1', '1', n::text);
   reset role;
+
+  -- ========== réaffectation : les notes de l'ancien conseiller disparaissent (0004) ==========
+  perform set_config('request.jwt.claims', json_build_object('sub', adv_id, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  begin
+    insert into public.notes (client_id, author_id, content) values (c2_id, adv_id, 'Note de test');
+    insert into tests.results values (19, 'advisor1 : note sur Client Two (affecté au test 18)', 'ok', 'ok');
+  exception when others then
+    insert into tests.results values (19, 'advisor1 : note sur Client Two (affecté au test 18)', 'ok', 'refusé : ' || sqlerrm);
+  end;
+  reset role;
+
+  perform set_config('request.jwt.claims', json_build_object('sub', admin_id, 'role', 'authenticated')::text, true);
+  set local role authenticated;
+  update public.users set advisor_id = null where id = c2_id;
+  get diagnostics n = row_count;
+  insert into tests.results values (20, 'admin : retire Client Two à advisor1', '1', n::text);
+  reset role;
+
+  -- compté en tant que postgres : plus personne ne pourrait voir ces lignes autrement
+  select count(*) into n from public.notes where client_id = c2_id and author_id = adv_id;
+  insert into tests.results values (21, 'notes d''advisor1 sur Client Two supprimées', '0', n::text);
 
   -- remise à l'état de départ (exécuté en tant que postgres)
   update public.users set advisor_id = null where id = c2_id;
